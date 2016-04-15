@@ -9,6 +9,9 @@ library(RColorBrewer)
 library(scales)
 library(ggmap)
 library(Cairo)
+library(plm)
+library(AER)
+library(flexmix)
 
 ############### Reading in the Data #############
 
