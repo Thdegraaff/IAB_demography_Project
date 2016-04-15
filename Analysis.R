@@ -1,9 +1,4 @@
-############### Reading necessary libraries #############
-
-library(dplyr)
-
-library(maptools)
-library(RColorBrewer)
+############## Set random number allocator ######
 set.seed(2)
 ############### Reading in the Data #############
 
@@ -13,9 +8,10 @@ EmpData = read.csv("Data/EmpData.csv")
 
 m1 <- lm(logemprate~logyouthshare, data = EmpData, weights = popshare)
 m2 <- plm(logemprate~logyouthshare, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
-#m3 <- plm(logemprate~logyouthshare|logbirthshare, data = EmpData, effect = "twoways", index = c("district_id","year"), inst.method="baltagi")
+m3 <- plm(logemprate~logyouthshare|pop_20_24_ins2, data = EmpData, effect = "twoways", index = c("lmr_id","year"), inst.method="baltagi")
 m4 <- lm(logemprate~logyouthshare + factor(lmr_id), data = EmpData, weights=popshare)
-#m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(district_id)|.-logyouthshare+logbirthshare, data = EmpData, weights =popshare)
+m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+pop_20_24_ins2, data = EmpData, weights =popshare)
+m6 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
 
 ############### Demean the data ###############
 
@@ -47,7 +43,7 @@ f1 <- flexmix(logempratetransform~logyouthsharetransform|lmr_id, data = EmpData,
 f2 <- stepFlexmix(logempratetransform~logyouthsharetransform|lmr_id, data = EmpData, k=2:10, nrep=3)
 plot(f2)
 ICL(f2)
-f <- getModel(f2, which=4)
+f <- getModel(f2, which=3)
 plot(f)
 EmpData$Cluster <- clusters(f)
 f <- refit(f, method="mstep")
@@ -55,49 +51,49 @@ Nocluster <- f@k
 
 clustermean <- EmpData %>% group_by(lmr_id) %>% 
     summarise(clustermean=mean(Cluster))
+clustermean$id <- clustermean$lmr_id
 
-Districts<-readShapePoly("Data/AMR_2012/AMR_2012.shp")
-Districts$lmr_id <- Districts$lmr2_id
+betacoef <- m6$coefficients
+betacoef <- data.frame(betacoef, clustermean$id)
+betacoef$id <- betacoef$clustermean.id
 
-Districts <- merge(Districts, clustermean, by="lmr_id")
-pdf("Figs/ClustersYouth.pdf")
-spplot(Districts,"clustermean",col.regions=brewer.pal(Nocluster,"Set1"),cuts = Nocluster-1, main="Regions classification based upon impact Youth")
-dev.off()
+##################### Read in the shape file #################################################
 
-##################### Extension of Garloff et al. with fmm and foreign employment share ####################
+RegionData <- filter(EmpData,year==2011) # Just pick one year
+Regions <- readOGR(dsn = "Data/AMR_2012", layer = "AMR_2012") # Read in shape file
+centroids <- as.data.frame(coordinates(Regions)) # Get centroids of regions for labels 
+names(centroids) <- c("Longitude", "Latitude")  # Rename x and y coordinates
+centroids$id <- Regions$lmr2_id  #  Generate id variable
 
-f2 <- flexmix(logempratetransform~logyouthsharetransform+logforsharetransform|district_id, data = EmpData, k = 4)
-#f2 <- stepFlexmix(logempratetransform~logyouthsharetransform|district_id, data = EmpData, k=2:10, nrep=3)
-plot(f2)
-Nocluster <- f2@k
-#f <- getModel(f1, which=8)
-f2_fit <- refit(f2, method="mstep")
+Regions <- fortify(Regions, region="lmr2_id") # Create large data frame from shape file
+Regions$id <- strtoi(Regions$id, base = 0L)   # id should be an integer and not a string
+RegionData$id <- RegionData$lmr_id # Generate ID variable for database
 
-EmpData$Cluster <- clusters(f2)
-clustermeanf2 <- EmpData %>% group_by(district_id) %>% 
-    summarise(clustermeanf2=mean(Cluster))
-#write.dta(clustermeanf2,"Data/clustermeanf2.dta")
-#write.dta(EmpData,"Data/EmpData.dta")
+RegionData <- left_join(RegionData, centroids, by="id") # Join database with centroids
+RegionData <- left_join(RegionData, clustermean, by="id") # Join database with clustermean
+RegionData <- left_join(RegionData, betacoef, by="id")
+Regions <- left_join(Regions, RegionData, by="id") # Join shape file with database
 
-Districts<-readShapePoly("Data/krs2013/krs2013.shp")
-Districts$district_id <- Districts$KRS1213/1000
+###################### Create general lay-out for figures #####################################
 
-Districts <- merge(Districts, clustermeanf2, by="district_id")
-pdf("Figs/ClustersYouthForeign.pdf")
-spplot(Districts,"clustermeanf2",col.regions=brewer.pal(Nocluster,"Dark2"),cuts = Nocluster-1, main="Regions classification based upon Youth and Foreign employment")
-dev.off()
+p <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = Nocluster-1), direction=1) 
+p <- p + guides(fill = guide_legend(reverse = TRUE))
+p <- p + theme_nothing(legend=TRUE)
+p <- p + theme(plot.title = element_text(size = rel(2), colour = "black")) 
 
-########################### Make map of beta coefficients ###########################################
+p1 <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = 10), direction=1) 
+p1 <- p1 + guides(fill = guide_legend(reverse = TRUE))
+p1 <- p1 + theme_nothing(legend=TRUE)
+p1 <- p1 + theme(plot.title = element_text(size = rel(2), colour = "black")) 
 
-m2 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
-myPal = colorRampPalette(brewer.pal(9,"PRGn"))(100)
-betacoef <- m2$coefficients
-district_id <- EmpData %>% group_by(lmr_id) %>% 
-    summarise(clustermean=mean(lmr_id))
-lmr_id <- clustermean$lmr_id
-betacoef <- data.frame(betacoef, lmr_id)
-Districts <- merge(Districts, betacoef, by="lmr_id")
-pdf("Figs/BetaPlot.pdf")
-spplot(Districts,"betacoef",col.regions=myPal,cuts=8, at = seq(-0.1, 0.22, by = 0.01))
-dev.off()
+######################## Create maps ###########################
 
+p_clusters <- p +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = clustermean), color = "black", size = 0.25) + 
+    labs(title = "Spatial distribution of clusters across Germany", fill = "") + 
+    geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
+ggsave(filename = "Figs/Clusters.pdf", width = 9.65, height = 11)
+
+p_betacoef <- p1 +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = betacoef), color = "black", size = 0.25) + 
+    labs(title = "Spatial distribution of beta coefficients across Germany", fill = "") + 
+    geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
+ggsave(filename = "Figs/BetaMap.pdf", width = 9.65, height = 11)

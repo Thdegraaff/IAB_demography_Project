@@ -39,6 +39,7 @@ EmpData <- EmpData %>%
         forshare = emp_for/Workingpop,
         youthshare = (pop_20_24)/Workingpop,
         popshare = pop/sum(pop),
+        logforshare = log(forshare),
         logemprate = log(emprate),
         logunemprate = log(unemprate),
         logyouthshare = log(youthshare)        
