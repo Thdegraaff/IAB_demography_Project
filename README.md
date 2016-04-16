@@ -2,7 +2,7 @@
 
 ## Introduction
 
-These files are the coding files for the paper *xxx*. Because of propietary reasons the data can unfortunately not be made public.
+These files are the coding files for the paper *Impact of youthshare on labor market outcomes in Germany*. Because of propietary reasons the data can unfortunately not be made public.
 
 The repository consists of:
 
