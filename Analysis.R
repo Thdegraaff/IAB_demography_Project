@@ -8,9 +8,9 @@ EmpData = read.csv("Data/EmpData.csv")
 
 m1 <- lm(logemprate~logyouthshare, data = EmpData, weights = popshare)
 m2 <- plm(logemprate~logyouthshare, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
-m3 <- plm(logemprate~logyouthshare|pop_20_24_ins2, data = EmpData, effect = "twoways", index = c("lmr_id","year"), inst.method="baltagi")
+m3 <- plm(logemprate~logyouthshare|instrument, data = EmpData, effect = "twoways", index = c("lmr_id","year"), inst.method="baltagi")
 m4 <- lm(logemprate~logyouthshare + factor(lmr_id), data = EmpData, weights=popshare)
-m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+pop_20_24_ins2, data = EmpData, weights =popshare)
+m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+instrument, data = EmpData, weights =popshare)
 m6 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
 
 ############### Demean the data ###############

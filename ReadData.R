@@ -16,26 +16,38 @@ library(flexmix)
 ############### Reading in the Data #############
 
 EmpData <- read.csv(file = "Data/Employment_lmr.csv", header = TRUE, sep =",")
-Instrument2 <- read.csv(file = "Data/Instrument2.csv", header = TRUE, sep =",")
+Instrument_20_24 <- read.csv(file = "Data/Instrument2.csv", header = TRUE, sep =",")
+Instrument_18_24 <- read.csv(file = "Data/Instrument2_18_24.csv", header = TRUE, sep =",")
+Instrument_15_24 <- read.csv(file = "Data/Instrument2_15_24.csv", header = TRUE, sep =",")
+Population_15_17 <- read.csv(file = "Data/Population_15_17_lmr.csv", header = TRUE, sep =",")
+Population_18_19 <- read.csv(file = "Data/Population_18_19_lmr.csv", header = TRUE, sep =",")
+
 
 ############### Merge the Data ##################
 
-EmpData <- left_join(EmpData, Instrument2, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Population_15_17, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Population_18_19, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Instrument_20_24, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Instrument_18_24, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Instrument_15_24, by = c("lmr_id","year"))
+
+############### Filter Empdata for years and regions ################
+
+EastGermany <- c(8, 9, 13, 93, 94, 104:141)
+#EmpData <- EmpData %>% filter(year <= 2011)
+#EmpData <- EmpData %>% filter(!lmr_id %in% EastGermany)
 
 ############### Recoding data ###################
 
 EmpData <- EmpData %>% 
     mutate(
-        Workingpop = pop_20_24 + pop_25_29 + 
+        Workingpop = #pop_15_17 + pop_18_19 + 
+            pop_20_24 + pop_25_29 + 
             pop_30_34 + pop_35_39 + pop_40_44 + 
             pop_45_49 + pop_50_54 + pop_55_59 + 
             pop_60_64,
-        Working = emp_20_24 + emp_25_29 + 
-            emp_30_34 + emp_35_39 + emp_40_44 + 
-            emp_45_49 + emp_50_54 + emp_55_59 + 
-            emp_60_64,
         unemprate = unemp/Workingpop,
-        emprate = emp/Workingpop,        
+        emprate = emp_20_24/pop_20_24,        
         forshare = emp_for/Workingpop,
         participationrate = (unemp + emp)/Workingpop,
         youthshare = (pop_20_24)/Workingpop,
@@ -43,7 +55,8 @@ EmpData <- EmpData %>%
         logforshare = log(forshare),
         logemprate = log(emprate),
         logunemprate = log(unemprate),
-        logyouthshare = log(youthshare)        
+        logyouthshare = log(youthshare), 
+        instrument = pop_20_24_ins2
     )
 
 ############### Saving Data ########################
@@ -101,3 +114,7 @@ p_pr <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, f
     labs(title = "Percentage of employment in\n German labor market regions in 2011", fill = "") + 
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 ggsave(filename = "Figs/ParticipationRate.pdf", width = 9.65, height = 11)
+
+##################### Clean Up #####################
+
+rm(list = ls())
