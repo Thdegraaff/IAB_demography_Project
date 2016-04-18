@@ -34,9 +34,10 @@ EmpData <- EmpData %>%
             emp_30_34 + emp_35_39 + emp_40_44 + 
             emp_45_49 + emp_50_54 + emp_55_59 + 
             emp_60_64,
-        unemprate = unemp/Working,
-        emprate = emp/Working,        
+        unemprate = unemp/Workingpop,
+        emprate = emp/Workingpop,        
         forshare = emp_for/Workingpop,
+        participationrate = (unemp + emp)/Workingpop,
         youthshare = (pop_20_24)/Workingpop,
         popshare = pop/sum(pop),
         logforshare = log(forshare),
@@ -95,3 +96,8 @@ p_youth <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group
     labs(title = "Percentage of employment in\n German labor market regions in 2011", fill = "") + 
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 ggsave(filename = "Figs/YouthShare.pdf", width = 9.65, height = 11)
+
+p_pr <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, fill = participationrate), color = "black", size = 0.25) + 
+    labs(title = "Percentage of employment in\n German labor market regions in 2011", fill = "") + 
+    geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
+ggsave(filename = "Figs/ParticipationRate.pdf", width = 9.65, height = 11)
