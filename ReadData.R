@@ -11,6 +11,8 @@ library(ggmap)
 library(Cairo)
 library(plm)
 library(AER)
+library(lmtest)
+library(sandwich)
 library(flexmix)
 
 ############### Reading in the Data #############
@@ -19,9 +21,11 @@ EmpData <- read.csv(file = "Data/Employment_lmr.csv", header = TRUE, sep =",")
 Instrument_20_24 <- read.csv(file = "Data/Instrument2.csv", header = TRUE, sep =",")
 Instrument_18_24 <- read.csv(file = "Data/Instrument2_18_24.csv", header = TRUE, sep =",")
 Instrument_15_24 <- read.csv(file = "Data/Instrument2_15_24.csv", header = TRUE, sep =",")
+Instrument_25_29 <- read.csv(file = "Data/Instrument2_25_29.csv", header = TRUE, sep =",")
+Instrument_20_29 <- read.csv(file = "Data/Instrument2_20_29.csv", header = TRUE, sep =",")
 Population_15_17 <- read.csv(file = "Data/Population_15_17_lmr.csv", header = TRUE, sep =",")
 Population_18_19 <- read.csv(file = "Data/Population_18_19_lmr.csv", header = TRUE, sep =",")
-
+Population_18_19 <- read.csv(file = "Data/Population_18_19_lmr.csv", header = TRUE, sep =",")
 
 ############### Merge the Data ##################
 
@@ -30,33 +34,39 @@ EmpData <- left_join(EmpData, Population_18_19, by = c("lmr_id","year"))
 EmpData <- left_join(EmpData, Instrument_20_24, by = c("lmr_id","year"))
 EmpData <- left_join(EmpData, Instrument_18_24, by = c("lmr_id","year"))
 EmpData <- left_join(EmpData, Instrument_15_24, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Instrument_25_29, by = c("lmr_id","year"))
+EmpData <- left_join(EmpData, Instrument_20_29, by = c("lmr_id","year"))
 
 ############### Filter Empdata for years and regions ################
 
+# We work standard with the dataset 2000-2010, because the year 2011
+# seems to be a bit of an outlier.
+
 EastGermany <- c(8, 9, 13, 93, 94, 104:141)
-#EmpData <- EmpData %>% filter(year <= 2011)
+EmpData <- EmpData %>% filter(year <= 2010)
 #EmpData <- EmpData %>% filter(!lmr_id %in% EastGermany)
 
 ############### Recoding data ###################
 
 EmpData <- EmpData %>% 
     mutate(
-        Workingpop = #pop_15_17 + pop_18_19 + 
+        Workingpop = #pop_15_17 + 
+            pop_18_19 + 
             pop_20_24 + pop_25_29 + 
             pop_30_34 + pop_35_39 + pop_40_44 + 
             pop_45_49 + pop_50_54 + pop_55_59 + 
             pop_60_64,
         unemprate = unemp/Workingpop,
-        emprate = emp_20_24/pop_20_24,        
+        emprate = emp/Workingpop,        
         forshare = emp_for/Workingpop,
         participationrate = (unemp + emp)/Workingpop,
-        youthshare = (pop_20_24)/Workingpop,
+        youthshare = (pop_18_19 + pop_20_24)/Workingpop,
         popshare = pop/sum(pop),
         logforshare = log(forshare),
         logemprate = log(emprate),
         logunemprate = log(unemprate),
         logyouthshare = log(youthshare), 
-        instrument = pop_20_24_ins2
+        loginstrument = log(pop_18_24_ins2)
     )
 
 ############### Saving Data ########################
@@ -73,7 +83,7 @@ ggsave(filename = "Figs/YouthPopulationExamples.pdf", width = 9.65, height = 11)
 
 ############### Making descriptive maps #################
 
-RegionData <- filter(EmpData,year==2011) # Just pick one year
+RegionData <- filter(EmpData,year==2010) # Just pick one year
 Regions <- readOGR(dsn = "Data/AMR_2012", layer = "AMR_2012") # Read in shape file
 centroids <- as.data.frame(coordinates(Regions)) # Get centroids of regions for labels 
 names(centroids) <- c("Longitude", "Latitude")  # Rename x and y coordinates

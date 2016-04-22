@@ -8,36 +8,46 @@ EmpData = read.csv("Data/EmpData.csv")
 
 m1 <- lm(logemprate~logyouthshare, data = EmpData, weights = popshare)
 m2 <- plm(logemprate~logyouthshare, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
-m3 <- plm(logemprate~logyouthshare|instrument, data = EmpData, effect = "twoways", index = c("lmr_id","year"), inst.method="baltagi")
-m4 <- lm(logemprate~logyouthshare + factor(lmr_id), data = EmpData, weights=popshare)
-m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+instrument, data = EmpData, weights =popshare)
+m3 <- plm(logemprate~logyouthshare|loginstrument, data = EmpData, effect = "twoways", index = c("lmr_id","year"), inst.method="baltagi")
+m4 <- lm(logemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
+m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare)
 m6 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
 
+############### Get robust standard errors with default HC3 method (different than Stata who uses HC1 method) #######
+
+coefm2 <- coeftest(m2, vcov=vcovHC)
+coefm4 <- coeftest(m4, vcovHC(m4,"HC3"))
+coefm5 <- coeftest(m5, vcovHC(m5,"HC3"))
+
 ############### Demean the data ###############
+
+# m7 <- lm(logyouthshare~loginstrument, data = EmpData, weights=popshare)
+# EmpData$logyouthshare <- predict.lm(m7)
 
 EmpData <- EmpData %>% group_by(year) %>% 
     mutate(
         logemprate_year = mean(logemprate),
         logyouthshare_year = mean(logyouthshare),
-        logforshare_year  = mean(logforshare)
+        loginstrument_year = mean(loginstrument) 
     )
 
 EmpData <- EmpData %>% group_by(lmr_id) %>% 
     mutate(
         logemprate_id = mean(logemprate),
         logyouthshare_id = mean(logyouthshare),
-        logforshare_id = mean(logforshare)
+        loginstrument_id = mean(loginstrument)
     )
 
 EmpData <- EmpData %>% mutate(
             logempratetransform = logemprate - logemprate_year - logemprate_id,
             logyouthsharetransform = logyouthshare - logyouthshare_year - logyouthshare_id, 
-            logforsharetransform = logforshare - logforshare_year - logforshare_id
+            loginstrumenttransform = loginstrument - loginstrument_year - loginstrument_id
 )
 
 ##################### Extension of Garloff et al. with fmm ####################
 
-summary(lm(logempratetransform~logyouthsharetransform, data = EmpData))
+# m7 <- lm(logyouthsharetransform~loginstrumenttransform, data = EmpData, weights=popshare)
+# EmpData$logyouthsharetransform <- predict.lm(m7)
 
 f1 <- flexmix(logempratetransform~logyouthsharetransform|lmr_id, data = EmpData, k = 4)
 f2 <- stepFlexmix(logempratetransform~logyouthsharetransform|lmr_id, data = EmpData, k=2:10, nrep=3)
@@ -59,7 +69,7 @@ betacoef$id <- betacoef$clustermean.id
 
 ##################### Read in the shape file #################################################
 
-RegionData <- filter(EmpData,year==2011) # Just pick one year
+RegionData <- filter(EmpData,year==2010) # Just pick one year
 Regions <- readOGR(dsn = "Data/AMR_2012", layer = "AMR_2012") # Read in shape file
 centroids <- as.data.frame(coordinates(Regions)) # Get centroids of regions for labels 
 names(centroids) <- c("Longitude", "Latitude")  # Rename x and y coordinates
@@ -81,7 +91,7 @@ p <- p + guides(fill = guide_legend(reverse = TRUE))
 p <- p + theme_nothing(legend=TRUE)
 p <- p + theme(plot.title = element_text(size = rel(2), colour = "black")) 
 
-p1 <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = 10), direction=1) 
+p1 <- ggplot() + scale_fill_distiller(palette = "PRGn", breaks = pretty_breaks(n = 10), direction=1) 
 p1 <- p1 + guides(fill = guide_legend(reverse = TRUE))
 p1 <- p1 + theme_nothing(legend=TRUE)
 p1 <- p1 + theme(plot.title = element_text(size = rel(2), colour = "black")) 
