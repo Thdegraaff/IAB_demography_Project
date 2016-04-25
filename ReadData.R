@@ -1,6 +1,7 @@
 ############### Reading necessary libraries #############
 
 library(dplyr)
+library(tidyr)
 library(maptools)
 library(rgdal)
 library(ggplot2)
@@ -75,11 +76,19 @@ write.csv(EmpData, file="Data/EmpData.csv", row.names=TRUE)
 
 ############### Making temporal descriptive plots ##############
 
-ggplot(subset(EmpData, lmr_name %in% c("Berlin", "Oldenburg", "Kiel", "Frankfurt am Main")),
+ggplot(subset(EmpData, lmr_name %in% c("Berlin", "Stuttgart", "Hamburg", "Frankfurt am Main")),
     aes(x=year, y=youthshare, color=lmr_name))+
-    geom_point() + geom_line() + theme_economist() + labs(x = "Year", y = "Youth population share") + theme(legend.title=element_blank()) +
-    theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold")) 
-ggsave(filename = "Figs/YouthPopulationExamples.pdf", width = 9.65, height = 11)
+    geom_point() + geom_line() + theme_tufte() + labs(x = "Year", y = "Youth population share") + theme(legend.title=element_blank()) +
+    #theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold")) +
+    scale_x_continuous(breaks = pretty_breaks(n=11))
+ggsave(filename = "Figs/YouthPopulationExamples.pdf", width = 6, height = 4)
+
+YearData <- EmpData %>% group_by(year) %>%
+            summarise(meanyouthshare= mean(youthshare),
+                      meanemprate = mean(emprate),
+                      meanunemprate= mean(unemprate)) #%>%
+            #gather("id","value", meanyouthshare:meanunemprate)
+ggplot(data = YearData, aes(x=year, y = meanemprate)) +geom_line()
 
 ############### Making descriptive maps #################
 
@@ -106,22 +115,22 @@ p <- p + theme(plot.title = element_text(size = rel(2), colour = "black"))
 ###################### Make specific maps for different variables
 
 p_unem <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, fill = unemprate), color = "black", size = 0.25) + 
-    labs(title = "Percentage of unemployment in\n German labor market regions in 2011", fill = "") + 
+    labs(title = "Percentage of unemployment in\n German labor market regions in 2010", fill = "") + 
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 ggsave(filename = "Figs/UnemploymentRate.pdf", width = 9.65, height = 11)
 
 p_em <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, fill = emprate), color = "black", size = 0.25) + 
-    labs(title = "Percentage of employment in\n German labor market regions in 2011", fill = "") + 
+    labs(title = "Percentage of employment in\n German labor market regions in 2010", fill = "") + 
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 ggsave(filename = "Figs/EmploymentRate.pdf", width = 9.65, height = 11)
 
 p_youth <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, fill = youthshare), color = "black", size = 0.25) + 
-    labs(title = "Percentage of employment in\n German labor market regions in 2011", fill = "") + 
+    labs(title = "Percentage of employment in\n German labor market regions in 2010", fill = "") + 
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 ggsave(filename = "Figs/YouthShare.pdf", width = 9.65, height = 11)
 
 p_pr <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, fill = participationrate), color = "black", size = 0.25) + 
-    labs(title = "Percentage of employment in\n German labor market regions in 2011", fill = "") + 
+    labs(title = "Participation rate in\n German labor market regions in 2010", fill = "") + 
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 ggsave(filename = "Figs/ParticipationRate.pdf", width = 9.65, height = 11)
 
