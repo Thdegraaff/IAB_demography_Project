@@ -15,6 +15,7 @@ library(AER)
 library(lmtest)
 library(sandwich)
 library(flexmix)
+library(stargazer)
 
 ############### Reading in the Data #############
 
