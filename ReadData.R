@@ -58,13 +58,17 @@ EmpData <- EmpData %>%
             pop_30_34 + pop_35_39 + pop_40_44 + 
             pop_45_49 + pop_50_54 + pop_55_59 + 
             pop_60_64,
+        Workingpopfor = pop_for_20_24 + pop_for_25_29 + 
+            pop_for_30_34 + pop_for_35_39 + pop_for_40_44 + 
+            pop_for_45_49 + pop_for_50_54 + pop_for_55_59 + 
+            pop_for_60_64,
         unemprate = unemp/Workingpop,
         emprate = emp/Workingpop,        
-        forshare = emp_for/Workingpop,
+        foremprate = emp_for/Workingpopfor,
         participationrate = (unemp + emp)/Workingpop,
         youthshare = (pop_18_19 + pop_20_24)/Workingpop,
         popshare = pop/sum(pop),
-        logforshare = log(forshare),
+        logforemprate = log(foremprate),
         logemprate = log(emprate),
         logunemprate = log(unemprate),
         logyouthshare = log(youthshare), 
