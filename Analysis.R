@@ -12,12 +12,28 @@ m3 <- plm(logemprate~logyouthshare|loginstrument, data = EmpData, effect = "twow
 m4 <- lm(logemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare)
 m6 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
+m7 <- lm(logunemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
+m8 <- ivreg(logunemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
 
 ############### Get robust standard errors with default HC3 method (different than Stata who uses HC1 method) #######
 
+robust_se_m4 <- sqrt(diag(vcovHC(m4, type = "HC3")))
+robust_se_m5 <- sqrt(diag(vcovHC(m5, type = "HC3")))
+robust_se_m7 <- sqrt(diag(vcovHC(m7, type = "HC3")))
+robust_se_m8 <- sqrt(diag(vcovHC(m8, type = "HC3")))
 coefm2 <- coeftest(m2, vcov=vcovHC)
 coefm4 <- coeftest(m4, vcovHC(m4,"HC3"))
 coefm5 <- coeftest(m5, vcovHC(m5,"HC3"))
+coefm7 <- coeftest(m7, vcovHC(m7,"HC3"))
+coefm8 <- coeftest(m8, vcovHC(m8,"HC3"))
+
+############### Write results to Latex file ###########
+# Be careful with overwriting (all additional fixed effects are
+# estimated as factors because of population weights)
+
+stargazer(m4, m5, m7, m8, se = list(robust_se_m4, robust_se_m5, robust_se_m7, robust_se_m8), 
+          title ="Generic impact of youth shares on (un)employment rate", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, 
+          column.labels=c("Employment (OLS)","Employment (IV)", "Unemployment (OLS)","Unemployment (IV)"))
 
 ############### Demean the data ###############
 
