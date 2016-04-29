@@ -154,41 +154,41 @@ betacoef$id <- betacoef$clustermean.id
 
 ##################### Read in the shape file #################################################
 
-# RegionData <- filter(EmpData,year==2010) # Just pick one year
-# Regions <- readOGR(dsn = "Data/AMR_2012", layer = "AMR_2012") # Read in shape file
-# centroids <- as.data.frame(coordinates(Regions)) # Get centroids of regions for labels 
-# names(centroids) <- c("Longitude", "Latitude")  # Rename x and y coordinates
-# centroids$id <- Regions$lmr2_id  #  Generate id variable
-# 
-# Regions <- fortify(Regions, region="lmr2_id") # Create large data frame from shape file
-# Regions$id <- strtoi(Regions$id, base = 0L)   # id should be an integer and not a string
-# RegionData$id <- RegionData$lmr_id # Generate ID variable for database
-# 
-# RegionData <- left_join(RegionData, centroids, by="id") # Join database with centroids
-# RegionData <- left_join(RegionData, clustermean, by="id") # Join database with clustermean
-# RegionData <- left_join(RegionData, betacoef, by="id")
-# Regions <- left_join(Regions, RegionData, by="id") # Join shape file with database
+RegionData <- filter(EmpData,year==2010) # Just pick one year
+Regions <- readOGR(dsn = "Data/AMR_2012", layer = "AMR_2012") # Read in shape file
+centroids <- as.data.frame(coordinates(Regions)) # Get centroids of regions for labels
+names(centroids) <- c("Longitude", "Latitude")  # Rename x and y coordinates
+centroids$id <- Regions$lmr2_id  #  Generate id variable
+
+Regions <- fortify(Regions, region="lmr2_id") # Create large data frame from shape file
+Regions$id <- strtoi(Regions$id, base = 0L)   # id should be an integer and not a string
+RegionData$id <- RegionData$lmr_id # Generate ID variable for database
+
+RegionData <- left_join(RegionData, centroids, by="id") # Join database with centroids
+RegionData <- left_join(RegionData, clustermean, by="id") # Join database with clustermean
+RegionData <- left_join(RegionData, betacoef, by="id")
+Regions <- left_join(Regions, RegionData, by="id") # Join shape file with database
 # 
 # ###################### Create general lay-out for figures #####################################
 # 
-# p <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = Nocluster-1), direction=1) 
-# p <- p + guides(fill = guide_legend(reverse = TRUE))
-# p <- p + theme_nothing(legend=TRUE)
-# p <- p + theme(plot.title = element_text(size = rel(2), colour = "black")) 
-# 
-# p1 <- ggplot() + scale_fill_distiller(palette = "PRGn", breaks = pretty_breaks(n = 10), direction=1) 
-# p1 <- p1 + guides(fill = guide_legend(reverse = TRUE))
-# p1 <- p1 + theme_nothing(legend=TRUE)
-# p1 <- p1 + theme(plot.title = element_text(size = rel(2), colour = "black")) 
+p <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = Nocluster-1), direction=1)
+p <- p + guides(fill = guide_legend(reverse = TRUE))
+p <- p + theme_nothing(legend=TRUE)
+p <- p + theme(plot.title = element_text(size = rel(2), colour = "black"))
+
+p1 <- ggplot() + scale_fill_distiller(palette = "PRGn", breaks = pretty_breaks(n = 10), direction=1)
+p1 <- p1 + guides(fill = guide_legend(reverse = TRUE))
+p1 <- p1 + theme_nothing(legend=TRUE)
+p1 <- p1 + theme(plot.title = element_text(size = rel(2), colour = "black"))
 # 
 # ######################## Create maps ###########################
 # 
-# p_clusters <- p +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = clustermean), color = "black", size = 0.25) + 
-#     labs(title = "Spatial distribution of clusters across Germany", fill = "") + 
-#     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
-# ggsave(filename = "Figs/Clusters.pdf", width = 9.65, height = 11)
-# 
-# p_betacoef <- p1 +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = betacoef), color = "black", size = 0.25) + 
-#     labs(title = "Spatial distribution of beta coefficients across Germany", fill = "") + 
-#     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
-# ggsave(filename = "Figs/BetaMap.pdf", width = 9.65, height = 11)
+p_clusters <- p +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = clustermean), color = "black", size = 0.25) +
+    labs(title = "Spatial distribution of clusters across Germany", fill = "") +
+    geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
+ggsave(filename = "Figs/Clusters.pdf", width = 9.65, height = 11)
+
+p_betacoef <- p1 +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = betacoef), color = "black", size = 0.25) +
+    labs(title = "Spatial distribution of beta coefficients across Germany", fill = "") +
+    geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
+ggsave(filename = "Figs/BetaMap.pdf", width = 9.65, height = 11)
