@@ -13,7 +13,10 @@ m4 <- lm(logemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpDat
 m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare)
 m6 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
 m7 <- lm(logunemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
-m8 <- ivreg(logunemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
+m8 <- ivreg(logunemprate~logyouthshare + factor(year) + factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
+
+print(summary(m5, diagnostics=TRUE))
+print(summary(m8, diagnostics=TRUE))
 
 # Heterogeneous impact of ethnicity
 
@@ -141,6 +144,9 @@ Nocluster <- f@k
 clustermean <- EmpData %>% group_by(lmr_id) %>% 
     summarise(clustermean=mean(Cluster))
 clustermean$id <- clustermean$lmr_id
+
+# Write clustermean to be used by Ceren
+write.dta(clustermean, "Data/Clusters.dta")
 
 betacoef <- m6$coefficients
 betacoef <- data.frame(betacoef, clustermean$id)

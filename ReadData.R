@@ -16,6 +16,7 @@ library(lmtest)
 library(sandwich)
 library(flexmix)
 library(stargazer)
+library(foreign)
 
 ############### Reading in the Data #############
 
