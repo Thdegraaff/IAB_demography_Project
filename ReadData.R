@@ -157,7 +157,7 @@ ggplot(data = YearData, aes(x=year, y = meanemprate)) +geom_line()
 # ggsave(filename = "Figs/EmploymentRate.pdf", width = 9.65, height = 11)
 # 
 # p_youth <- p +  geom_polygon(data=Regions, aes  (x= long, y = lat, group = group, fill = youthshare), color = "black", size = 0.25) + 
-#     labs(title = "Percentage of employment in\n German labor market regions in 2010", fill = "") + 
+#     labs(title = "Youth share in\n German labor market regions in 2010", fill = "") + 
 #     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 # ggsave(filename = "Figs/YouthShare.pdf", width = 9.65, height = 11)
 # 
