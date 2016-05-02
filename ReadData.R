@@ -47,7 +47,7 @@ EmpData <- left_join(EmpData, Instrument_20_29, by = c("lmr_id","year"))
 
 EastGermany <- c(8, 9, 13, 93, 94, 104:141)
 EmpData <- EmpData %>% filter(year <= 2010)
-#EmpData <- EmpData %>% filter(!lmr_id %in% EastGermany)
+# EmpData <- EmpData %>% filter(!lmr_id %in% EastGermany)
 
 ############### Recoding data ###################
 

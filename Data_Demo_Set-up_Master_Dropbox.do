@@ -33,5 +33,23 @@ do ${graphs}/Graphs_Demo_160427_002.do
 
 do ${graphs}/Graphs_Demo_160427_003.do
 
+do ${anal}/Analysis_Demo_160419_001.do
+
+do ${anal}/Analysis_Demo_160419_002.do
+
+do ${anal}/Analysis_Demo_160419_003.do
+
+do ${anal}/Analysis_Demo_160419_004.do
+
+do ${anal}/Analysis_Demo_160419_005.do
+
+do ${anal}/Analysis_Demo_160419_006.do
+
+do ${anal}/Analysis_Demo_160419_007.do
+
+do ${anal}/Analysis_Demo_160419_008.do
+
+do ${anal}/Analysis_Demo_160419_009.do
+
 
 exit, clear
