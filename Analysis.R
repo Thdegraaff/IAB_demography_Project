@@ -12,6 +12,7 @@ m3 <- plm(logemprate~logyouthshare|loginstrument, data = EmpData, effect = "twow
 m4 <- lm(logemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m5 <- ivreg(logemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare)
 m6 <- plm(logemprate~logyouthshare:lmr_id, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
+m6a<- lm(logemprate~logyouthshare:factor(lmr_id) + factor(year), data = EmpData, weights = popshare)
 m7 <- lm(logunemprate~logyouthshare + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m8 <- ivreg(logunemprate~logyouthshare + factor(year) + factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
 
@@ -148,7 +149,7 @@ clustermean$id <- clustermean$lmr_id
 # Write clustermean to be used by Ceren
 write.dta(clustermean, "Data/Clusters.dta")
 
-betacoef <- m6$coefficients
+betacoef <- m6a$coefficients[12:152]
 betacoef <- data.frame(betacoef, clustermean$id)
 betacoef$id <- betacoef$clustermean.id
 
