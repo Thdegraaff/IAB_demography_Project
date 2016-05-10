@@ -21,24 +21,6 @@ library(foreign)
 ############### Reading in the Data #############
 
 EmpData <- read.csv(file = "Data/Employment_lmr.csv", header = TRUE, sep =",")
-Instrument_20_24 <- read.csv(file = "Data/Instrument2.csv", header = TRUE, sep =",")
-Instrument_18_24 <- read.csv(file = "Data/Instrument2_18_24.csv", header = TRUE, sep =",")
-Instrument_15_24 <- read.csv(file = "Data/Instrument2_15_24.csv", header = TRUE, sep =",")
-Instrument_25_29 <- read.csv(file = "Data/Instrument2_25_29.csv", header = TRUE, sep =",")
-Instrument_20_29 <- read.csv(file = "Data/Instrument2_20_29.csv", header = TRUE, sep =",")
-Population_15_17 <- read.csv(file = "Data/Population_15_17_lmr.csv", header = TRUE, sep =",")
-Population_18_19 <- read.csv(file = "Data/Population_18_19_lmr.csv", header = TRUE, sep =",")
-Population_18_19 <- read.csv(file = "Data/Population_18_19_lmr.csv", header = TRUE, sep =",")
-
-############### Merge the Data ##################
-
-EmpData <- left_join(EmpData, Population_15_17, by = c("lmr_id","year"))
-EmpData <- left_join(EmpData, Population_18_19, by = c("lmr_id","year"))
-EmpData <- left_join(EmpData, Instrument_20_24, by = c("lmr_id","year"))
-EmpData <- left_join(EmpData, Instrument_18_24, by = c("lmr_id","year"))
-EmpData <- left_join(EmpData, Instrument_15_24, by = c("lmr_id","year"))
-EmpData <- left_join(EmpData, Instrument_25_29, by = c("lmr_id","year"))
-EmpData <- left_join(EmpData, Instrument_20_29, by = c("lmr_id","year"))
 
 ############### Filter Empdata for years and regions ################
 
