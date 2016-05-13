@@ -22,22 +22,25 @@ library(foreign)
 
 EmpData <- read.csv(file = "Data/Employment_lmr.csv", header = TRUE, sep =",")
 
-############### Filter Empdata for years and regions ################
+############### Filter Empdata for years, regions and university towns ################
 
 # We work standard with the dataset 2000-2010, because the year 2011
 # seems to be a bit of an outlier.
 
 EastGermany <- c(8, 9, 13, 93, 94, 104:141)
+UniTowns <- c(44, 125, 74, 8, 44, 86, 90)
 EmpData <- EmpData %>% filter(year <= 2010)
 # EmpData <- EmpData %>% filter(!lmr_id %in% EastGermany)
+# EmpData <- EmpData %>% filter(!lmr_id %in% UniTowns)
 
 ############### Recoding data ###################
 
 EmpData <- EmpData %>% 
     mutate(
         Workingpop = #pop_15_17 + 
-            pop_18_19 + 
-            pop_20_24 + pop_25_29 + 
+            #pop_18_19 + 
+            #pop_20_24 + 
+            pop_25_29 + 
             pop_30_34 + pop_35_39 + pop_40_44 + 
             pop_45_49 + pop_50_54 + pop_55_59 + 
             pop_60_64,
@@ -70,7 +73,9 @@ EmpData <- EmpData %>%
         logemptask11 = emp_task_11/emp,
         logemptask12 = emp_task_12/emp,
         unemprate = unemp/Workingpop,
-        emprate = emp/Workingpop,        
+        unemprate_Shimer = unemp/(emp+unemp),
+        emprate = emp/Workingpop,
+        emprate_Shimer = emp/(emp+unemp),
         foremprate = emp_for/Workingpopfor,
         geremprate = emp_ger/Workingpopger,
         participationrate = (unemp + emp)/Workingpop,
@@ -79,7 +84,9 @@ EmpData <- EmpData %>%
         logforemprate = log(foremprate),
         loggeremprate = log(geremprate),
         logemprate = log(emprate),
+        logemprate_Shimer = log(emprate_Shimer),
         logunemprate = log(unemprate),
+        logunemprate_Shimer = log(unemprate_Shimer),
         logyouthshare = log(youthshare), 
         loginstrument = log(pop_18_24_ins2)
     )
