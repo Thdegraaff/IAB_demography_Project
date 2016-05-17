@@ -1,0 +1,8 @@
+#these are occupation codes and labels in EmpData
+
+1 Agriculture
+2 Mining
+3 Production
+4 Technical Occupations
+5 Services
+6 Other

@@ -39,7 +39,7 @@ EmpData <- EmpData %>%
     mutate(
         Workingpop = #pop_15_17 + 
             #pop_18_19 + 
-            #pop_20_24 + 
+            pop_20_24 + 
             pop_25_29 + 
             pop_30_34 + pop_35_39 + pop_40_44 + 
             pop_45_49 + pop_50_54 + pop_55_59 + 
@@ -90,6 +90,44 @@ EmpData <- EmpData %>%
         logyouthshare = log(youthshare), 
         loginstrument = log(pop_18_24_ins2)
     )
+
+############################ Create Bartik Index ################################
+
+nr_regions <- nrow(EmpData)/11
+EmpData <- EmpData %>% 
+    group_by(lmr_id) %>%
+        mutate(emp_lag = lag(emp,1),
+           emp_occ1_lag = lag(emp_occ1, na.rm = TRUE),
+           emp_occ2_lag = lag(emp_occ2, na.rm = TRUE),
+           emp_occ3_lag = lag(emp_occ3, na.rm = TRUE),
+           emp_occ4_lag = lag(emp_occ4, na.rm = TRUE),
+           emp_occ5_lag = lag(emp_occ5, na.rm = TRUE),
+           emp_occ6_lag = lag(emp_occ6, na.rm = TRUE)           
+           )
+EmpData$emp_occ2_lag[EmpData$emp_occ2_lag == 0] <- 1
+EmpData <- EmpData %>%
+    group_by(year) %>%
+        mutate(
+            emp_occ1_gr = sum(emp_occ1/emp_occ1_lag, na.rm = TRUE)/nr_regions,
+            emp_occ2_gr = sum(emp_occ2/emp_occ2_lag, na.rm = TRUE)/nr_regions,
+            emp_occ3_gr = sum(emp_occ3/emp_occ3_lag, na.rm = TRUE)/nr_regions,
+            emp_occ4_gr = sum(emp_occ4/emp_occ4_lag, na.rm = TRUE)/nr_regions,
+            emp_occ5_gr = sum(emp_occ5/emp_occ5_lag, na.rm = TRUE)/nr_regions,
+            emp_occ6_gr = sum(emp_occ6/emp_occ6_lag, na.rm = TRUE)/nr_regions            
+               )
+EmpData[is.na(EmpData)] <- 0
+EmpData <- EmpData %>%
+            mutate(
+                Lhat = emp_occ1_gr * emp_occ1_lag +        
+                    emp_occ2_gr * emp_occ2_lag +
+                    emp_occ3_gr * emp_occ3_lag +
+                    emp_occ4_gr * emp_occ4_lag +
+                    emp_occ5_gr * emp_occ5_lag +
+                    emp_occ6_gr * emp_occ6_lag,                     
+                logLhat = log(Lhat)
+            )
+
+EmpData <- EmpData %>% filter(year >= 2001)
 
 ############### Saving Data ########################
 
