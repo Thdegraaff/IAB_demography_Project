@@ -4,7 +4,7 @@ set.seed(2)
 
 EmpData = read.csv("Data/EmpData.csv")
 
-############### Analyses #################
+a############### Analyses #################
 
 m1 <- lm(logemprate~logyouthshare+logLhat, data = EmpData, weights = popshare)
 m2 <- plm(logemprate~logyouthshare + logLhat, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
@@ -21,30 +21,30 @@ print(summary(m8, diagnostics=TRUE))
 
 # Heterogeneous impact of ethnicity
 
-m9 <- ivreg(logforemprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m10 <- ivreg(loggeremprate~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
+m9 <- ivreg(logforemprate~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m10 <- ivreg(loggeremprate~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
 
 # Heterogeneous impact of age cohort
 
-m11 <- ivreg(logemprate2030~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m12 <- ivreg(logemprate3040~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m13 <- ivreg(logemprate4050~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m14 <- ivreg(logemprate5065~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
+m11 <- ivreg(logemprate2030~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m12 <- ivreg(logemprate3040~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m13 <- ivreg(logemprate4050~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m14 <- ivreg(logemprate5065~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
 
 # Heterogeneous impact by task
 
-m15 <- ivreg(logemptask1~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m16 <- ivreg(logemptask2~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m17 <- ivreg(logemptask3~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m18 <- ivreg(logemptask4~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m19 <- ivreg(logemptask5~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m20 <- ivreg(logemptask6~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m21 <- ivreg(logemptask7~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m22 <- ivreg(logemptask8~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m23 <- ivreg(logemptask9~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m24 <- ivreg(logemptask10~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m25 <- ivreg(logemptask11~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
-m26 <- ivreg(logemptask12~logyouthshare + factor(year)+factor(lmr_id)|.-logyouthshare+loginstrument, data = EmpData, weights=popshare) 
+m15 <- ivreg(logemptask1~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m16 <- ivreg(logemptask2~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m17 <- ivreg(logemptask3~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m18 <- ivreg(logemptask4~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m19 <- ivreg(logemptask5~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m20 <- ivreg(logemptask6~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m21 <- ivreg(logemptask7~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m22 <- ivreg(logemptask8~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m23 <- ivreg(logemptask9~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m24 <- ivreg(logemptask10~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m25 <- ivreg(logemptask11~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
+m26 <- ivreg(logemptask12~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
 
 ############### Get robust standard errors with default HC3 method (different than Stata who uses HC1 method) #######
 
@@ -99,8 +99,14 @@ coefm26 <- coeftest(m26, vcovHC(m26,"HC3"))
 # Be careful with overwriting (all additional fixed effects are
 # estimated as factors because of population weights)
 
-stargazer(m4, m5, m7, m8, se = list(robust_se_m4, robust_se_m5, robust_se_m7, robust_se_m8), file = "Output/GenericImpact.tex",
-          title ="Generic impact of youth shares on (un)employment rate", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+# stargazer(m4, m5, m7, m8, se = list(robust_se_m4, robust_se_m5, robust_se_m7, robust_se_m8), file = "Output/GenericImpact.tex",
+#           title ="Generic impact of youth shares (18--64) on (un-)employment rate", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+# 
+# stargazer(m11, m12, m13, m14, se = list(robust_se_m11, robust_se_m12, robust_se_m13, robust_se_m14), file = "Output/cohortimpact.tex",
+#           title ="Generic impact of youth shares (18--64) on employment rate of specific age cohorts", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+# 
+# stargazer(m10, m9, se = list(robust_se_m10, robust_se_m9), file = "Output/ethnicimpact.tex",
+#           title ="Generic impact of youth shares (18--64) on employment rates by ethnicity", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
 
 ############### Demean the data ###############
 
@@ -110,6 +116,7 @@ stargazer(m4, m5, m7, m8, se = list(robust_se_m4, robust_se_m5, robust_se_m7, ro
 EmpData <- EmpData %>% group_by(year) %>% 
     mutate(
         logemprate_year = mean(logemprate),
+        logLhat_year = mean(logLhat),
         logyouthshare_year = mean(logyouthshare),
         loginstrument_year = mean(loginstrument) 
     )
@@ -117,14 +124,16 @@ EmpData <- EmpData %>% group_by(year) %>%
 EmpData <- EmpData %>% group_by(lmr_id) %>% 
     mutate(
         logemprate_id = mean(logemprate),
+        logLhat_id = mean(logLhat),
         logyouthshare_id = mean(logyouthshare),
         loginstrument_id = mean(loginstrument)
     )
 
 EmpData <- EmpData %>% mutate(
-            logempratetransform = logemprate - logemprate_year - logemprate_id,
-            logyouthsharetransform = logyouthshare - logyouthshare_year - logyouthshare_id, 
-            loginstrumenttransform = loginstrument - loginstrument_year - loginstrument_id
+            logempratetransform = logemprate - logemprate_year - logemprate_id + mean(logemprate),
+            logLhattransform = logLhat - logLhat_year - logLhat_id + mean(logLhat),
+            logyouthsharetransform = logyouthshare - logyouthshare_year - logyouthshare_id + mean(logyouthshare), 
+            loginstrumenttransform = loginstrument - loginstrument_year - loginstrument_id + mean(loginstrument)
 )
 
 ##################### Extension of Garloff et al. with fmm ####################
@@ -132,14 +141,16 @@ EmpData <- EmpData %>% mutate(
 # m7 <- lm(logyouthsharetransform~loginstrumenttransform, data = EmpData, weights=popshare)
 # EmpData$logyouthsharetransform <- predict.lm(m7)
 
-f1 <- flexmix(logempratetransform~logyouthsharetransform|lmr_id, data = EmpData, k = 4)
-f2 <- stepFlexmix(logempratetransform~logyouthsharetransform|lmr_id, data = EmpData, k=2:10, nrep=3)
+f1 <- flexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logyouthsharetransform, 
+                                    fixed=~logLhattransform), data = EmpData, k = 4)
+f2 <- stepFlexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logyouthsharetransform, 
+                                                  fixed=~logLhattransform), data = EmpData, k=2:8, nrep=3)
 plot(f2)
 ICL(f2)
 f <- getModel(f2, which=3)
 plot(f)
 EmpData$Cluster <- clusters(f)
-f <- refit(f, method="mstep")
+f <- refit(f)
 Nocluster <- f@k
 
 clustermean <- EmpData %>% group_by(lmr_id) %>% 

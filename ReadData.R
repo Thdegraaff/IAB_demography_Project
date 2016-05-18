@@ -9,7 +9,6 @@ library(ggthemes)
 library(RColorBrewer)
 library(scales)
 library(ggmap)
-library(Cairo)
 library(plm)
 library(AER)
 library(lmtest)
@@ -38,7 +37,7 @@ EmpData <- EmpData %>% filter(year <= 2010)
 EmpData <- EmpData %>% 
     mutate(
         Workingpop = #pop_15_17 + 
-            #pop_18_19 + 
+            pop_18_19 + 
             pop_20_24 + 
             pop_25_29 + 
             pop_30_34 + pop_35_39 + pop_40_44 + 
