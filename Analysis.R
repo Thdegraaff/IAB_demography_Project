@@ -4,7 +4,7 @@ set.seed(2)
 
 EmpData = read.csv("Data/EmpData.csv")
 
-a############### Analyses #################
+############### Analyses #################
 
 m1 <- lm(logemprate~logyouthshare+logLhat, data = EmpData, weights = popshare)
 m2 <- plm(logemprate~logyouthshare + logLhat, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
@@ -12,7 +12,7 @@ m3 <- plm(logemprate~logyouthshare + logLhat|logLhat + loginstrument, data = Emp
 m4 <- lm(logemprate~logyouthshare + logLhat + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m5 <- ivreg(logemprate~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare)
 m6 <- plm(logemprate~logyouthshare:lmr_id + logLhat, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
-m6a<- lm(logemprate~logyouthshare:factor(lmr_id) + logLhat +  factor(year), data = EmpData, weights = popshare)
+m6a<- lm(logemprate~logyouthshare:factor(lmr_id) + logLhat + factor(lmr_id) + factor(year), data = EmpData, weights = popshare)
 m7 <- lm(logunemprate~logyouthshare + logLhat + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m8 <- ivreg(logunemprate~logyouthshare + logLhat + factor(year) + factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
 
@@ -117,34 +117,34 @@ EmpData <- EmpData %>% group_by(year) %>%
     mutate(
         logemprate_year = mean(logemprate),
         logLhat_year = mean(logLhat),
-        logyouthshare_year = mean(logyouthshare),
-        loginstrument_year = mean(loginstrument) 
+        logyouthshare_year = mean(logyouthshare)
     )
 
 EmpData <- EmpData %>% group_by(lmr_id) %>% 
     mutate(
         logemprate_id = mean(logemprate),
         logLhat_id = mean(logLhat),
-        logyouthshare_id = mean(logyouthshare),
-        loginstrument_id = mean(loginstrument)
+        logyouthshare_id = mean(logyouthshare)
     )
 
+meanlogemprate = mean(EmpData$logemprate)
+meanlogLhat = mean(EmpData$logLhat)
+meanlogyouthshare = mean(EmpData$logyouthshare)
+
 EmpData <- EmpData %>% mutate(
-            logempratetransform = logemprate - logemprate_year - logemprate_id + mean(logemprate),
-            logLhattransform = logLhat - logLhat_year - logLhat_id + mean(logLhat),
-            logyouthsharetransform = logyouthshare - logyouthshare_year - logyouthshare_id + mean(logyouthshare), 
-            loginstrumenttransform = loginstrument - loginstrument_year - loginstrument_id + mean(loginstrument)
+            logempratetransform = logemprate -logemprate_id,# - logemprate_year + meanlogemprate,
+            logLhattransform = logLhat - logLhat_id,# - logLhat_year + meanlogLhat,
+            logyouthsharetransform = logyouthshare - logyouthshare_id# - logyouthshare_year + meanlogyouthshare
 )
 
 ##################### Extension of Garloff et al. with fmm ####################
 
-# m7 <- lm(logyouthsharetransform~loginstrumenttransform, data = EmpData, weights=popshare)
-# EmpData$logyouthsharetransform <- predict.lm(m7)
-
+mcheck <- lm(logempratetransform~0+logyouthsharetransform+logLhattransform, data = EmpData)
 f1 <- flexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logyouthsharetransform, 
-                                    fixed=~logLhattransform), data = EmpData, k = 4)
-f2 <- stepFlexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logyouthsharetransform, 
-                                                  fixed=~logLhattransform), data = EmpData, k=2:8, nrep=3)
+                                    fixed=~logLhattransform), data = EmpData, k = 1)
+f2 <- stepFlexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~0+logyouthsharetransform, 
+                                                 fixed=~logLhattransform+factor(year)), data = EmpData, k=2:8, nrep=3)
+
 plot(f2)
 ICL(f2)
 f <- getModel(f2, which=3)
@@ -160,7 +160,7 @@ clustermean$id <- clustermean$lmr_id
 # Write clustermean to be used by Ceren
 write.dta(clustermean, "Data/Clusters.dta")
 
-betacoef <- m6a$coefficients[12:152]
+betacoef <- m6a$coefficients[152:292]
 betacoef <- data.frame(betacoef, clustermean$id)
 betacoef$id <- betacoef$clustermean.id
 
@@ -180,9 +180,9 @@ RegionData <- left_join(RegionData, centroids, by="id") # Join database with cen
 RegionData <- left_join(RegionData, clustermean, by="id") # Join database with clustermean
 RegionData <- left_join(RegionData, betacoef, by="id")
 Regions <- left_join(Regions, RegionData, by="id") # Join shape file with database
-# 
+ 
 # ###################### Create general lay-out for figures #####################################
-# 
+
 p <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = Nocluster-1), direction=1)
 p <- p + guides(fill = guide_legend(reverse = TRUE))
 p <- p + theme_nothing(legend=TRUE)
