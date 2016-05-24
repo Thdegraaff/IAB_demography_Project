@@ -11,13 +11,10 @@ m2 <- plm(logemprate~logyouthshare + logLhat, data = EmpData, effect = "twoways"
 m3 <- plm(logemprate~logyouthshare + logLhat|logLhat + loginstrument, data = EmpData, effect = "twoways", index = c("lmr_id","year"), inst.method="baltagi")
 m4 <- lm(logemprate~logyouthshare + logLhat + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m5 <- ivreg(logemprate~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare)
-m6 <- plm(logemprate~logyouthshare:lmr_id + logLhat, data = EmpData, effect = "twoways",index = c("lmr_id","year"))
+m6 <- ivreg(logemprate~logyouthshare + logyouthsharefor + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare - logyouthsharefor + logforinstrument + logLhat+loginstrument, data = EmpData, weights=popshare)
 m6a<- lm(logemprate~logyouthshare:factor(lmr_id) + logLhat + factor(lmr_id) + factor(year), data = EmpData, weights = popshare)
 m7 <- lm(logunemprate~logyouthshare + logLhat + factor(lmr_id) + factor(year), data = EmpData, weights=popshare)
 m8 <- ivreg(logunemprate~logyouthshare + logLhat + factor(year) + factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
-
-print(summary(m5, diagnostics=TRUE))
-print(summary(m8, diagnostics=TRUE))
 
 # Heterogeneous impact of ethnicity
 
@@ -110,9 +107,6 @@ coefm26 <- coeftest(m26, vcovHC(m26,"HC3"))
 
 ############### Demean the data ###############
 
-# m7 <- lm(logyouthshare~loginstrument, data = EmpData, weights=popshare)
-# EmpData$logyouthshare <- predict.lm(m7)
-
 EmpData <- EmpData %>% group_by(year) %>% 
     mutate(
         logemprate_year = mean(logemprate),
@@ -132,9 +126,9 @@ meanlogLhat = mean(EmpData$logLhat)
 meanlogyouthshare = mean(EmpData$logyouthshare)
 
 EmpData <- EmpData %>% mutate(
-            logempratetransform = logemprate -logemprate_id,# - logemprate_year + meanlogemprate,
-            logLhattransform = logLhat - logLhat_id,# - logLhat_year + meanlogLhat,
-            logyouthsharetransform = logyouthshare - logyouthshare_id# - logyouthshare_year + meanlogyouthshare
+            logempratetransform = logemprate -logemprate_id - logemprate_year + meanlogemprate,
+            logLhattransform = logLhat - logLhat_id - logLhat_year + meanlogLhat,
+            logyouthsharetransform = logyouthshare - logyouthshare_id - logyouthshare_year + meanlogyouthshare
 )
 
 ##################### Extension of Garloff et al. with fmm ####################
@@ -143,22 +137,29 @@ mcheck <- lm(logempratetransform~0+logyouthsharetransform+logLhattransform, data
 f1 <- flexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logyouthsharetransform, 
                                     fixed=~logLhattransform), data = EmpData, k = 1)
 f2 <- stepFlexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~0+logyouthsharetransform, 
-                                                 fixed=~logLhattransform+factor(year)), data = EmpData, k=2:8, nrep=3)
+                                                 fixed=~logLhattransform), data = EmpData, k=2:8, nrep=3)
 
 plot(f2)
 ICL(f2)
 f <- getModel(f2, which=3)
 plot(f)
+Probs <- data.frame(posterior(f))
 EmpData$Cluster <- clusters(f)
 f <- refit(f)
 Nocluster <- f@k
-
+Probs$lmr_id <- EmpData$lmr_id
 clustermean <- EmpData %>% group_by(lmr_id) %>% 
     summarise(clustermean=mean(Cluster))
+Probabilities <-  Probs %>% group_by(lmr_id) %>% 
+    summarise(PrCluster1=mean(X1),
+              PrCluster2=mean(X2),
+              PrCluster3=mean(X3),
+              PrCluster4=mean(X4))
 clustermean$id <- clustermean$lmr_id
 
 # Write clustermean to be used by Ceren
 write.dta(clustermean, "Data/Clusters.dta")
+write.csv(Probabilities, "Data/ProbabilitiesFMM.csv")
 
 betacoef <- m6a$coefficients[152:292]
 betacoef <- data.frame(betacoef, clustermean$id)

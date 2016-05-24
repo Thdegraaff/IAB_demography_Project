@@ -36,7 +36,7 @@ EmpData <- EmpData %>% filter(year <= 2010)
 
 EmpData <- EmpData %>% 
     mutate(
-        Workingpop = #pop_15_17 + 
+        Workingpop = #pop_15_17 +  # Be careful here with nominator and denominator
             pop_18_19 + 
             pop_20_24 + 
             pop_25_29 + 
@@ -79,15 +79,20 @@ EmpData <- EmpData %>%
         geremprate = emp_ger/Workingpopger,
         participationrate = (unemp + emp)/Workingpop,
         youthshare = (pop_18_19 + pop_20_24)/Workingpop,
+        youthshareger = (pop_ger_20_24)/Workingpop,
+        youthsharefor = (pop_for_20_24)/Workingpop,
         popshare = pop/sum(pop),
         logforemprate = log(foremprate),
         loggeremprate = log(geremprate),
+        logyouthshareger = log(youthshareger),
+        logyouthsharefor = log(youthsharefor),        
         logemprate = log(emprate),
         logemprate_Shimer = log(emprate_Shimer),
         logunemprate = log(unemprate),
         logunemprate_Shimer = log(unemprate_Shimer),
         logyouthshare = log(youthshare), 
-        loginstrument = log(pop_18_24_ins2)
+        loginstrument = log(pop_18_24_ins2),
+        logforinstrument = log(pop_for_7y)
     )
 
 ############################ Create Bartik Index ################################
