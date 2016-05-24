@@ -126,7 +126,7 @@ meanlogLhat = mean(EmpData$logLhat)
 meanlogyouthshare = mean(EmpData$logyouthshare)
 
 EmpData <- EmpData %>% mutate(
-            logempratetransform = logemprate -logemprate_id - logemprate_year + meanlogemprate,
+            logempratetransform = logemprate - logemprate_id - logemprate_year + meanlogemprate,
             logLhattransform = logLhat - logLhat_id - logLhat_year + meanlogLhat,
             logyouthsharetransform = logyouthshare - logyouthshare_id - logyouthshare_year + meanlogyouthshare
 )
@@ -184,7 +184,7 @@ Regions <- left_join(Regions, RegionData, by="id") # Join shape file with databa
  
 # ###################### Create general lay-out for figures #####################################
 
-p <- ggplot() + scale_fill_distiller(palette = "Greens", breaks = pretty_breaks(n = Nocluster-1), direction=1)
+p <- ggplot() + scale_fill_distiller(palette = "Paired", breaks = pretty_breaks(n = Nocluster-1), direction=1)
 p <- p + guides(fill = guide_legend(reverse = TRUE))
 p <- p + theme_nothing(legend=TRUE)
 p <- p + theme(plot.title = element_text(size = rel(2), colour = "black"))
