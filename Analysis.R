@@ -126,18 +126,18 @@ meanlogLhat = mean(EmpData$logLhat)
 meanlogyouthshare = mean(EmpData$logyouthshare)
 
 EmpData <- EmpData %>% mutate(
-            logempratetransform = logemprate - logemprate_id - logemprate_year + meanlogemprate,
-            logLhattransform = logLhat - logLhat_id - logLhat_year + meanlogLhat,
-            logyouthsharetransform = logyouthshare - logyouthshare_id - logyouthshare_year + meanlogyouthshare
+            logempratetransform = logemprate - logemprate_id,# - logemprate_year + meanlogemprate,
+            logLhattransform = logLhat - logLhat_id,# - logLhat_year + meanlogLhat,
+            logyouthsharetransform = logyouthshare - logyouthshare_id# - logyouthshare_year + meanlogyouthshare
 )
 
 ##################### Extension of Garloff et al. with fmm ####################
 
-mcheck <- lm(logempratetransform~0+logyouthsharetransform+logLhattransform, data = EmpData)
+mcheck <- lm(logempratetransform~0+logyouthsharetransform+logLhattransform+factor(year), data = EmpData)
 f1 <- flexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logyouthsharetransform, 
-                                    fixed=~logLhattransform), data = EmpData, k = 1)
+                                    fixed=~logLhattransform+factor(year)), data = EmpData, k = 1)
 f2 <- stepFlexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~0+logyouthsharetransform, 
-                                                 fixed=~logLhattransform), data = EmpData, k=2:8, nrep=3)
+                                                 fixed=~logLhattransform+factor(year)), data = EmpData, k=2:8, nrep=3)
 
 plot(f2)
 ICL(f2)
