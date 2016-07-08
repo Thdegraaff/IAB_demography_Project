@@ -16,6 +16,8 @@ library(lmtest)
 library(sandwich)
 library(flexmix)
 library(texreg)
+library(stargazer)
+library(foreign)
 ############### Reading in the Data #############
 
 EmpData = read.csv("Data/EmpData.csv")
@@ -143,8 +145,6 @@ coefm30 <- coeftest(m30, vcovHC(m30,"HC3"))
 coefm31 <- coeftest(m31, vcovHC(m31,"HC3"))
 coefm32 <- coeftest(m32, vcovHC(m32,"HC3"))
 
-
-
 # Robustness Checks 1: Shimer's (2001) definition
 
 m33 <- ivreg(logemprate_Shimer~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare)
@@ -156,6 +156,7 @@ coefm33 <- coeftest(m33, vcovHC(m33,"HC3"))
 coefm34 <- coeftest(m34, vcovHC(m34,"HC3"))
 
 # Robustness Checks 2.1: Role of Youth share on age specific employment
+
 m35 <- ivreg(logemprate2024~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
 m36 <- ivreg(logemprate2529~logyouthshare + logLhat + factor(year)+factor(lmr_id)|.-logyouthshare+ logLhat+loginstrument, data = EmpData, weights=popshare) 
 
@@ -200,32 +201,113 @@ coefm39 <- coeftest(m39, vcovHC(m39,"HC3"))
 
 
 ############### Write results to Latex file ###########
-# Be careful with overwriting (all additional fixed effects are
-# estimated as factors because of population weights)
+# Be careful with overwriting (all additional fixed effects are estimated as factors because of population weights)
 
- stargazer(m4, m5, m7, m8, se = list(robust_se_m4, robust_se_m5, robust_se_m7, robust_se_m8), out = "./Output/GenericImpact.tex",
-           title ="Generic impact of youth share (18--64) on (un-)employment rate", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
- 
- stargazer(m10, m9, m10a, se = list(robust_se_m10, robust_se_m9, robust_se_m10a), out = "Output/ethnicimpact.tex",
-           title ="Generic impact of youth share (18--64) on employment rates by ethnicity", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+stargazer(m4, m5, m7, m8, se = list(robust_se_m4, robust_se_m5, robust_se_m7, robust_se_m8),  style = "demography",
+           align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant","logLhat"), model.numbers = FALSE, notes.align = "l", 
+           dep.var.labels = c("log(employment)", "log(unemployment)"), 
+           out = "./Output/GenericImpact.tex",
+           title ="Generic impact of youth share (18--64) on log((un-)employment rate)",
+           covariate.labels = c("log(Youth share)", "$\\hat{L}_{rt}$"), 
+           add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                            c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                            c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+           #notes = ""
+ )
 
- stargazer(m11, m12, m13, m14, m14a, se = list(robust_se_m11, robust_se_m12, robust_se_m13, robust_se_m14, robust_se_m14a), out = "Output/cohortimpact.tex",
-           title ="Generic impact of youth share (18--64) on employment rate of specific age cohorts", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
- 
- stargazer(m15, m16, m17,m18, m19, m20, m21,m22, m23, m24, m25, m26, se = list(robust_se_m15, robust_se_m16, robust_se_m17, robust_se_m18, robust_se_m19, robust_se_m20, robust_se_m21, robust_se_m22, robust_se_m23, robust_se_m24, robust_se_m25, robust_se_m26), out = "Output/taskcompimpact.tex",
-           title ="Generic impact of youth share (18--64) on employment rates by task complexity", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+stargazer(m10, m9, m10a, se = list(robust_se_m10, robust_se_m9, robust_se_m10a), style = "demography",
+          align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant","logLhat"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("natives", "foreigner", "natives"), 
+          out = "./Output/EthnicImpact.tex",
+          title ="Generic impact of youth share (18--64) on log(employment rates) by ethnicity",
+          covariate.labels = c("log(Youth share)", "log(Youth share)$_{\\text{foreigners}}$","$\\hat{L}_{rt}$"), 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+          #notes = ""
+)
 
- stargazer(m27, m28, m29,m30, m31, m32, se = list(robust_se_m27, robust_se_m28, robust_se_m29, robust_se_m30, robust_se_m31, robust_se_m32), out = "Output/sectorimpact.tex",
-           title ="Generic impact of youth share (18--64) on employment rates by sectors", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+stargazer(m33, m34, se = list(robust_se_m33, robust_se_m34), style = "demography",
+          align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant","logLhat"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("log(employment)", "log(unemployment)"), 
+          out = "./Output/ShimerDefinition.tex",
+          title ="Generic impact of youth share (18--64) on employment rates by using Shimer's definition",
+          covariate.labels = c("log(Youth share)", "$\\hat{L}_{rt}$"), 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}"))
+          #notes = ""
+)
 
- stargazer(m33, m34, se = list(robust_se_m33, robust_se_m34), out = "Output/Shimerdefinition.tex",
-           title ="Generic impact of youth share (18--64) on employment rates by using Shimer's definition", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+stargazer(m38, m39, se = list(robust_se_m38, robust_se_m39), style = "demography",
+          align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant", "logLhat"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("log(employment)", "log(unemployment)"), 
+          out = "./output/ExclEasternGermanyImpact.tex",
+          title ="Generic impact of youth share (18--64) on employment rates excluding Eastern Germany",
+          covariate.labels = c("log(Youth share)", "$\\hat{L}_{rt}$"), 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}"))
+          #notes = ""
+)
 
- stargazer(m35, m36, m37, se = list(robust_se_m35, robust_se_m36, robust_se_m37), out = "Output/Youngestimpact.tex",
-           title ="Generic impact of youth share on employment rates by altered definition of youth share", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+stargazer(m35, m36, m37, se = list(robust_se_m35, robust_se_m36, robust_se_m37), style = "demography",
+          align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant", "logLhat"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("Youth share (20--24)", "Youth share (25--29)", "Excl. uni. towns"), 
+          out = "./output/YoungestImpact.tex",
+          title ="Generic impact of youth share on employment rates by altered definition of youth share",
+          covariate.labels = c("log(Youth share)", "$\\hat{L}_{rt}$"), 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+          #notes = ""
+)
 
- stargazer(m38, m39, se = list(robust_se_m38, robust_se_m39), out =  "Output/ExclEasternGermanyimpact.tex",
-           title ="Generic impact of youth share (18--64) on employment rates excluding Eastern Germany", align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE)
+stargazer(m11, m12, m13, m14, m14a, se = list(robust_se_m11, robust_se_m12, robust_se_m13, robust_se_m14, robust_se_m14a),  style = "demography",
+          align=TRUE, keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant","logLhat"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("Age 20--25", "Age 25--35", "Age 30--45", "Age 45--55", "Age 55--65"), 
+          out = "./output/CohortImpact.tex",
+          title ="Generic impact of youth share (18--64) on employment rate of specific age cohorts",
+          covariate.labels = c("log(Youth share)", "$\\hat{L}_{rt}$"), 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+          #notes = ""
+)
+
+stargazer(m15, m16, m17,m18, m19, m20, m21,m22, m23, m24, m25, m26, 
+          se = list(robust_se_m15, robust_se_m16, robust_se_m17, robust_se_m18, robust_se_m19, robust_se_m20, 
+                    robust_se_m21, robust_se_m22, robust_se_m23, robust_se_m24, robust_se_m25, robust_se_m26),  style = "demography",
+          keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant","logLhat"), model.numbers = FALSE, notes.align = "l", digits=2,
+          dep.var.labels = c("Agra.", "S man.","Q. man.","Tech.", "Eng.","S serv.", "Q. serv.",
+                             "S. prof.","Prof.","S. adm.","Q. adm.", "Man"),
+          out = "./output/TaskImpact.tex",
+          title ="Generic impact of youth share (18--64) on employment rates by task complexity",
+          covariate.labels = c("log(YS)", "$\\hat{L}_{rt}$")
+          , 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+          #notes = ""
+)
+
+
+stargazer(m27, m28, m29, m30, m31, m32, 
+          se = list(robust_se_m27, robust_se_m28, robust_se_m29, robust_se_m30, robust_se_m31, robust_se_m32), style = "demography",
+          keep.stat=c("rsq","n"), no.space=TRUE, omit = c("factor","Constant","logLhat"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("Agri", "Mining", "Prod.", "Technical", "Services", "Other"),
+          out = "Output/SectorImpact.tex",
+          title ="Generic impact of youth share (18--64) on employment rates by sectors",
+          covariate.labels = c("log(YS)", "$\\hat{L}_{rt}$"), 
+          add.lines = list(c("Region dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+                           c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+          #notes = "" 
+)
+############## First stage effects on log youth share #########
+
+m_inst = lm(logyouthshare~logLhat+loginstrument + factor(year)+factor(lmr_id), data = EmpData, weights = popshare)
+EmpData$logyouthshare = predict(m_inst)
 
 ############### Demean the data ###############
 
@@ -261,15 +343,23 @@ f1 <- flexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~logy
 f2 <- stepFlexmix(.~x|lmr_id, model = FLXMRglmfix(formula = logempratetransform~0+logyouthsharetransform, 
                                                  fixed=~logLhattransform+factor(year)), data = EmpData, k=2:8, nrep=3)
 
+pdf("./Figs/Convergence.pdf")
 plot(f2)
-ICL(f2)
-f <- getModel(f2, which=3)
+dev.off()
+
+f <- getModel(f2, which="5")
+
+pdf("./Figs/Rootogram.pdf")
 plot(f)
+dev.off()
+
 Probs <- data.frame(posterior(f))
 EmpData$Cluster <- clusters(f)
 f <- refit(f)
 Nocluster <- f@k
 Probs$lmr_id <- EmpData$lmr_id
+
+# Take the mean over the various periods
 clustermean <- EmpData %>% group_by(lmr_id) %>% 
     summarise(clustermean=mean(Cluster))
 Probabilities <-  Probs %>% group_by(lmr_id) %>% 
@@ -279,13 +369,10 @@ Probabilities <-  Probs %>% group_by(lmr_id) %>%
               PrCluster4=mean(X4))
 clustermean$id <- clustermean$lmr_id
 
-# Write clustermean to be used by Ceren
+# Write clustermean to be used by Ceren and Probabilities to be used by Dani
 write.dta(clustermean, "Data/Clusters.dta")
+write.dta(Probabilities, "Data/ProbabilitiesFMM.dta")
 write.csv(Probabilities, "Data/ProbabilitiesFMM.csv")
-
-#betacoef <- m6a$coefficients[152:292]
-#betacoef <- data.frame(betacoef, clustermean$id)
-#betacoef$id <- betacoef$clustermean.id
 
 ##################### Read in the shape file #################################################
 
@@ -301,7 +388,7 @@ RegionData$id <- RegionData$lmr_id # Generate ID variable for database
 
 RegionData <- left_join(RegionData, centroids, by="id") # Join database with centroids
 RegionData <- left_join(RegionData, clustermean, by="id") # Join database with clustermean
-#RegionData <- left_join(RegionData, betacoef, by="id")
+RegionData <- left_join(RegionData, betacoef, by="id")
 Regions <- left_join(Regions, RegionData, by="id") # Join shape file with database
  
 # ###################### Create general lay-out for figures #####################################
@@ -312,10 +399,10 @@ p <- p + guides(fill = guide_legend(reverse = TRUE))
 p <- p + theme_nothing(legend=TRUE)
 p <- p + theme(plot.title = element_text(size = rel(2), colour = "black"))
 
-#p1 <- ggplot() + scale_fill_distiller(palette = "PRGn", breaks = pretty_breaks(n = 10), direction=1)
-#p1 <- p1 + guides(fill = guide_legend(reverse = TRUE))
-#p1 <- p1 + theme_nothing(legend=TRUE)
-#p1 <- p1 + theme(plot.title = element_text(size = rel(2), colour = "black"))
+p1 <- ggplot() + scale_fill_distiller(palette = "PRGn", breaks = pretty_breaks(n = 10), direction=1)
+p1 <- p1 + guides(fill = guide_legend(reverse = TRUE))
+p1 <- p1 + theme_nothing(legend=TRUE)
+p1 <- p1 + theme(plot.title = element_text(size = rel(2), colour = "black"))
  
 # ######################## Create maps ###########################
 
@@ -323,9 +410,9 @@ p_clusters <- p +  geom_polygon(data=Regions, aes(x= long, y = lat, group = grou
     labs(title = "Spatial distribution of clusters across Germany", fill = "") +
     geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
 p_clusters
-#ggsave(filename = "Figs/Clusters.pdf", width = 9.65, height = 11)
+ggsave(filename = "Figs/Clusters.pdf", width = 9.65, height = 11)
 
-#p_betacoef <- p1 +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = betacoef), color = "black", size = 0.25) +
-#    labs(title = "Spatial distribution of beta coefficients across Germany", fill = "") +
-#    geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
-#ggsave(filename = "Figs/BetaMap.pdf", width = 9.65, height = 11)
+p_betacoef <- p1 +  geom_polygon(data=Regions, aes(x= long, y = lat, group = group, fill = betacoef), color = "black", size = 0.25) +
+   labs(title = "Spatial distribution of beta coefficients across Germany", fill = "") +
+   geom_text(data=RegionData, aes(label = substr(lmr_name,1,3), x = Longitude, y = Latitude))
+ggsave(filename = "Figs/BetaMap.pdf", width = 9.65, height = 11)
