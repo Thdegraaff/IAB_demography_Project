@@ -321,6 +321,7 @@ stargazer(m27, m28, m29, m30, m31, m32, style = "demography",
 # Create first difference variables and select population share minus the first year
 logunemprate_lag <- diff(EmpData$logunemprate, 141, 1)
 logemprate_lag <- diff(EmpData$logemprate, 141, 1)
+loginstrument_lag <- diff(EmpData$loginstrument, 141, 1)
 logyouthshare_lag <- diff(EmpData$logyouthshare, 141, 1)
 bartik <- diff(EmpData$logLhat, 141,1)
 popshare <- EmpData$popshare[142:length(EmpData$popshare)]
@@ -337,6 +338,7 @@ lmr_id <- EmpData$lmr_id
 # Multiply all first difference variables with square root of popshare to weight
 logemprate_transform <- logemprate_lag*sqrt(EmpData$popshare)
 logunemprate_transform <- logunemprate_lag*sqrt(EmpData$popshare)
+loginstrument_transform <- loginstrument_lag*sqrt(EmpData$popshare)
 logyouthshare_transform <- logyouthshare_lag*sqrt(EmpData$popshare)
 bartik_transform <- bartik*sqrt(EmpData$popshare)
 years_transform <- years*sqrt(EmpData$popshare)
@@ -346,7 +348,7 @@ years_transform <- years_transform[,2:ncol(years_transform)]
 
 ##################### Extension of Garloff et al. with fmm ####################
 
-f2 <- stepFlexmix(logunemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform|lmr_id, k=1:8, nrep=5)
+f2 <- stepFlexmix(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform|lmr_id, k=1:8, nrep=5)
 
 pdf("./Figs/Convergence.pdf")
 plot(f2)
@@ -379,6 +381,36 @@ clustermean$id <- clustermean$lmr_id
 write.dta(clustermean, "Data/Clusters.dta")
 write.dta(Probabilities, "Data/ProbabilitiesFMM.dta")
 write.csv(Probabilities, "Data/ProbabilitiesFMM.csv")
+
+##################### Use the instrument on the 4 clusters! ##################################
+
+cluster1 <- lm(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform, weights = Probs[,2])
+iv_cluster1 <- ivreg(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform|
+                                         0 + bartik_transform + loginstrument_transform + years_transform, weights = Probs[,2])
+
+cluster2 <- lm(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform, weights = Probs[,3])
+iv_cluster2 <- ivreg(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform|
+                         0 + bartik_transform + loginstrument_transform + years_transform, weights = Probs[,3])
+                                        
+cluster3 <- lm(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform, weights = Probs[,4])
+iv_cluster3 <- ivreg(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform|
+                         0 + bartik_transform + loginstrument_transform + years_transform, weights = Probs[,4])
+
+cluster4 <- lm(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform, weights = Probs[,5])
+iv_cluster4 <- ivreg(logemprate_transform~0 + bartik_transform + logyouthshare_transform + years_transform|
+                         0 + bartik_transform + loginstrument_transform + years_transform, weights = Probs[,5])
+
+stargazer(cluster1, cluster2, cluster3, cluster4, iv_cluster1, iv_cluster2, iv_cluster3, iv_cluster4, style = "demography",
+          keep.stat=c("rsq","n"), no.space=TRUE, omit = c("years","bartik"), model.numbers = FALSE, notes.align = "l", 
+          dep.var.labels = c("1", "2", "3", "4", "1", "2", "3", "4"),
+          out = "Output/ClusterIV.tex",
+          title ="Generic impact of youth share (18--64) on employment rates by sectors",
+          covariate.labels = c("log(YS)")
+#          add.lines = list(c("First differenced", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+ #                          c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
+ #                          c("Bartik index", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"))
+          #notes = "" 
+)
 
 ##################### Read in the shape file #################################################
 
