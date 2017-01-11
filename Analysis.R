@@ -401,10 +401,10 @@ iv_cluster4 <- ivreg(logemprate_transform~0 + bartik_transform + logyouthshare_t
                          0 + bartik_transform + loginstrument_transform + years_transform, weights = Probs[,5])
 
 stargazer(cluster1, cluster2, cluster3, cluster4, iv_cluster1, iv_cluster2, iv_cluster3, iv_cluster4, style = "demography",
-          keep.stat=c("rsq","n"), no.space=TRUE, omit = c("years","bartik"), model.numbers = FALSE, notes.align = "l", 
-          dep.var.labels = c("1", "2", "3", "4", "1", "2", "3", "4"),
+          keep.stat=c("rsq","n"), no.space=TRUE, omit = c("years","bartik"), model.numbers = TRUE, notes.align = "l", 
+          custom.labels = c("1", "2", "3", "4", "1", "2", "3", "4"),
           out = "Output/ClusterIV.tex",
-          title ="Generic impact of youth share (18--64) on employment rates by sectors",
+          title ="Generic impact of youth share (18--64) on employment rates by clusters (OLS = 1--4; IV = 5--8)",
           covariate.labels = c("log(YS)")
 #          add.lines = list(c("First differenced", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
  #                          c("Time dummies", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}", "\\text{Yes}"),
